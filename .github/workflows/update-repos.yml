@@ -36,4 +36,4 @@ jobs:
           GITHUB_ORG: ${{ github.event.inputs.github_org }}
           GITHUB_TEAM: ${{ github.event.inputs.github_team }}
         run: |
-          python update_repos.py
+          python scripts/update_repos.py

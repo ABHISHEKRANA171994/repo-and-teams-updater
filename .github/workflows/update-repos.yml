@@ -1,39 +1,27 @@
-name: Update Repositories and Add Teams
+name: Update Repository Names
 
 on:
   workflow_dispatch:
     inputs:
-      github_org:
-        description: 'GitHub organization name'
+      csv-file:
+        description: 'Path to the CSV file with repo names'
         required: true
-        type: string
-      github_team:
-        description: 'GitHub team name'
-        required: true
-        type: string
+        default: 'mapping.csv'
 
 jobs:
   update-repos:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install requests
+          sudo apt-get install -y python3 python3-pip
+          pip3 install pandas PyGithub
 
-      - name: Run repository update script
+      - name: Run update script
+        run: python3 update_repos.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ORG: ${{ github.event.inputs.github_org }}
-          GITHUB_TEAM: ${{ github.event.inputs.github_team }}
-        run: |
-          python scripts/update_repos.py

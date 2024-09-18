@@ -1,6 +1,7 @@
 import os
 import requests
 import logging
+import csv
 
 # GitHub API base URL
 GITHUB_API_URL = "https://api.github.com"
@@ -46,27 +47,24 @@ def add_team_to_repo(repo_name):
     else:
         logging.error(f"Failed to add team to {repo_name}: {response.status_code} - {response.text}")
 
-def update_repos_and_add_teams(existing_file, updated_file):
-    # Read the existing repository names
-    with open(existing_file, 'r') as f:
-        existing_repos = [line.strip() for line in f.readlines()]
+def update_repos_and_add_teams(csv_file):
+    with open(csv_file, 'r') as file:
+        reader = csv.DictReader(file)
+        
+        for row in reader:
+            old_repo = row['Existing Repo Name'].strip()
+            new_repo = row['Updated Repo Name'].strip()
+            support_link = row['support-link'].strip()
+            test_support_link = row['test-support-link'].strip()
 
-    # Read the updated repository names
-    with open(updated_file, 'r') as f:
-        updated_repos = [line.strip() for line in f.readlines()]
+            logging.info(f"Processing repo: {old_repo} -> {new_repo}")
+            rename_repo(old_repo, new_repo)
+            add_team_to_repo(new_repo)
 
-    if len(existing_repos) != len(updated_repos):
-        logging.error("Mismatch between number of existing and updated repos.")
-        return
-
-    logging.info(f"Updating {len(existing_repos)} repositories and adding teams...")
-
-    # Process renaming and team addition
-    for old_repo, new_repo in zip(existing_repos, updated_repos):
-        rename_repo(old_repo, new_repo)
-        add_team_to_repo(new_repo)
+            # You can add additional processing for support and test support links if needed
+            logging.info(f"Support Link: {support_link}")
+            logging.info(f"Test Support Link: {test_support_link}")
 
 # Example usage
-existing_file = 'existing.txt'
-updated_file = 'updated.txt'
-update_repos_and_add_teams(existing_file, updated_file)
+csv_file = 'inputs/mapping.csv'
+update_repos_and_add_teams(csv_file)
